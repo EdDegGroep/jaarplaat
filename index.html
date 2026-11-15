@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#17131c">
+<title>Jaarplaat — het muziek-tijdlijnspel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#17131c;--bg2:#221b29;--bg3:#2c2335;--line:#3d3349;
+  --ink:#f6efe3;--mute:#b2a6bd;--dim:#7d7189;
+  --acc:#ff7a3d;--acc2:#ffc53d;--ok:#4fd1a5;--bad:#ff5c7a;
+  --card:#f6efe3;--cardink:#1c1622;--r:18px;
+  --disp:'Bricolage Grotesque',ui-sans-serif,system-ui,sans-serif;
+  --body:'Instrument Sans',ui-sans-serif,system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45}
+body{min-height:100dvh;background:
+  radial-gradient(900px 500px at 110% -10%,rgba(255,122,61,.16),transparent 60%),
+  radial-gradient(700px 500px at -20% 110%,rgba(255,197,61,.08),transparent 60%),var(--bg);background-attachment:fixed}
+#app{max-width:560px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 18px) 16px calc(env(safe-area-inset-bottom) + 40px)}
+h1,h2,h3,.disp{font-family:var(--disp);letter-spacing:-.02em;margin:0}
+h1{font-size:44px;font-weight:800;line-height:1}
+h2{font-size:26px;font-weight:700;line-height:1.1}
+h3{font-size:18px;font-weight:700}
+p{margin:.4em 0}
+a{color:var(--acc2)}
+.mute{color:var(--mute)}.dim{color:var(--dim)}.small{font-size:13px}
+.row{display:flex;gap:10px;align-items:center}.row.wrap{flex-wrap:wrap}.grow{flex:1;min-width:0}
+.between{justify-content:space-between}.center{text-align:center}
+.stack>*+*{margin-top:10px}
+.panel{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin:14px 0}
+.btn{appearance:none;border:1px solid var(--line);background:var(--bg3);color:var(--ink);font:600 15px var(--body);padding:12px 16px;border-radius:14px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;min-height:46px;transition:transform .08s,background .15s}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--acc);border-color:var(--acc);color:#1c1622}
+.btn.gold{background:var(--acc2);border-color:var(--acc2);color:#1c1622}
+.btn.ghost{background:transparent}
+.btn.big{font-size:18px;padding:16px 20px;min-height:58px;border-radius:18px}
+.btn.block{width:100%}
+.btn.sm{font-size:13px;padding:7px 11px;min-height:34px;border-radius:10px}
+.btn[disabled]{opacity:.4;pointer-events:none}
+input[type=text],input[type=number],select{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--ink);font:500 16px var(--body);padding:11px 12px;border-radius:12px;outline:none}
+input:focus,select:focus{border-color:var(--acc)}
+label.opt{display:flex;gap:12px;align-items:flex-start;padding:10px 0;cursor:pointer}
+label.opt+label.opt{border-top:1px solid var(--line)}
+label.opt input{margin-top:3px;accent-color:var(--acc);width:18px;height:18px;flex:none}
+.field{display:block;margin:10px 0}.field>span{display:block;font-size:13px;color:var(--mute);margin-bottom:5px}
+code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px}
+.copybox{display:flex;gap:8px;align-items:center;background:var(--bg);border:1px dashed var(--line);border-radius:12px;padding:8px 8px 8px 12px;word-break:break-all}
+ol.steps{padding-left:20px;margin:8px 0}ol.steps li{margin:6px 0}
+.warn{background:rgba(255,92,122,.12);border:1px solid rgba(255,92,122,.4);border-radius:14px;padding:12px 14px;font-size:14px}
+.note{background:rgba(255,197,61,.10);border:1px solid rgba(255,197,61,.3);border-radius:14px;padding:12px 14px;font-size:14px}
+.hero{padding:26px 0 8px}
+.hero .tag{display:inline-block;font:700 12px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--acc);margin-bottom:10px}
+.logo{display:flex;align-items:center;gap:12px}
+.logo .disc{width:46px;height:46px;border-radius:50%;background:repeating-radial-gradient(circle,#0d0b10 0 2px,#1f1a25 2px 4px);position:relative;box-shadow:0 0 0 2px #2c2335}
+.logo .disc::after{content:"";position:absolute;inset:34%;border-radius:50%;background:var(--acc)}
+.pl-list{max-height:320px;overflow:auto;margin:6px -4px 0;padding:0 4px}
+.pl{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.pl img,.pl .ph{width:40px;height:40px;border-radius:8px;object-fit:cover;background:var(--bg3);flex:none}
+.pl.off{opacity:.45}
+.hist{display:flex;align-items:flex-end;gap:4px;height:90px;margin-top:10px}
+.hist div{flex:1;background:linear-gradient(var(--acc),#c4512a);border-radius:6px 6px 2px 2px;min-height:3px;position:relative}
+.hist div span{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--mute);white-space:nowrap}
+.bigstat{font-family:var(--disp);font-size:44px;font-weight:800;line-height:1}
+/* scorebar */
+.scores{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin:0 -16px;padding-left:16px;padding-right:16px;scrollbar-width:none}
+.scores::-webkit-scrollbar{display:none}
+.chip{flex:none;display:flex;align-items:center;gap:7px;background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:6px 12px 6px 8px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap}
+.chip .n{background:var(--bg3);border-radius:999px;min-width:26px;height:26px;display:grid;place-items:center;font-family:var(--disp);font-weight:800}
+.chip.on{border-color:var(--acc);background:rgba(255,122,61,.14)}
+.chip.on .n{background:var(--acc);color:#1c1622}
+.coins{color:var(--acc2);font-size:13px}
+/* vinyl */
+.deck{display:grid;place-items:center;padding:16px 0 6px;position:relative}
+.vinyl{width:min(62vw,230px);aspect-ratio:1;border-radius:50%;position:relative;
+  background:conic-gradient(from 0deg,rgba(255,255,255,.07),transparent 12%,rgba(255,255,255,.05) 30%,transparent 45%,rgba(255,255,255,.07) 60%,transparent 75%),repeating-radial-gradient(circle,#0c0a0f 0 1.5px,#1b1620 1.5px 3.5px);
+  box-shadow:0 24px 60px rgba(0,0,0,.55),0 0 0 6px #0c0a0f}
+.vinyl .lbl{position:absolute;inset:33%;border-radius:50%;background:radial-gradient(circle,#1c1622 0 7%,var(--acc) 7.5% 100%);display:grid;place-items:center;font-family:var(--disp);font-weight:800;font-size:clamp(26px,9vw,40px);color:#1c1622}
+.vinyl.spin{animation:spin 2.4s linear infinite}
+.vinyl.spin.paused{animation-play-state:paused}
+@keyframes spin{to{transform:rotate(360deg)}}
+.vinyl .lbl span{display:inline-block}
+.vinyl.spin .lbl span{animation:spin 2.4s linear infinite reverse}
+.vinyl.spin.paused .lbl span{animation-play-state:paused}
+.snip{height:4px;background:var(--bg3);border-radius:4px;overflow:hidden;margin:14px auto 0;width:min(62vw,230px)}
+.snip i{display:block;height:100%;background:var(--acc2);width:100%;transform-origin:left}
+.ctrl{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.turnhead{text-align:center;margin:18px 0 4px}
+.turnhead .who{font-family:var(--disp);font-size:32px;font-weight:800;line-height:1.05}
+.turnhead .sub{color:var(--mute);font-size:14px}
+/* timeline */
+.tl{margin-top:16px}
+.tcard{display:flex;gap:12px;align-items:center;background:var(--card);color:var(--cardink);border-radius:14px;padding:9px 12px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.tcard .yr{font-family:var(--disp);font-weight:800;font-size:26px;min-width:62px;line-height:1}
+.tcard img,.tcard .ph{width:44px;height:44px;border-radius:8px;object-fit:cover;flex:none;background:#d9cdb8}
+.tcard .t{font-weight:700;font-size:15px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.tcard .a{font-size:13px;color:#5b4f66;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tcard.fresh{animation:pop .6s cubic-bezier(.2,1.4,.4,1)}
+.tcard+.tcard{margin-top:8px}
+@keyframes pop{0%{transform:scale(.6);opacity:0}100%{transform:none;opacity:1}}
+.slot{display:flex;align-items:center;justify-content:center;gap:6px;height:38px;margin:7px 0;border:2px dashed var(--line);border-radius:12px;color:var(--dim);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
+.slot:hover{border-color:var(--mute);color:var(--mute)}
+.slot.sel{height:60px;border-color:var(--acc);border-style:solid;background:rgba(255,122,61,.14);color:var(--acc);font-size:15px}
+.slot.good{border-color:var(--ok);border-style:solid;background:rgba(79,209,165,.12);color:var(--ok)}
+.edge{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);text-align:center;margin:4px 0}
+/* reveal */
+.reveal{border-radius:22px;padding:18px;background:var(--card);color:var(--cardink);text-align:center;margin-top:16px;animation:pop .5s cubic-bezier(.2,1.3,.4,1)}
+.reveal img,.reveal .ph{width:132px;height:132px;border-radius:14px;object-fit:cover;box-shadow:0 10px 30px rgba(0,0,0,.25);background:#d9cdb8}
+.reveal .yr{font-family:var(--disp);font-weight:800;font-size:64px;line-height:1;margin-top:10px}
+.reveal .t{font-weight:700;font-size:19px;margin-top:6px}
+.reveal .a{color:#5b4f66}
+.reveal .orig{font-size:12px;color:#7a6d86;margin-top:6px}
+.verdict{font-family:var(--disp);font-weight:800;font-size:28px;text-align:center;margin-top:18px}
+.verdict.ok{color:var(--ok)}.verdict.bad{color:var(--bad)}.verdict.buy{color:var(--acc2)}
+.sticky{position:sticky;bottom:calc(env(safe-area-inset-bottom) + 10px);margin-top:16px;z-index:5}
+.sticky .btn{box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.menu-btn{background:none;border:none;color:var(--mute);font-size:22px;cursor:pointer;padding:6px;line-height:1}
+/* toast & modal */
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 20px);transform:translateX(-50%) translateY(30px);background:#fff;color:#1c1622;font-weight:600;padding:12px 16px;border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:all .25s;max-width:min(92vw,480px);font-size:14px;z-index:50;text-align:center}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#modal{position:fixed;inset:0;background:rgba(10,8,12,.72);display:none;align-items:flex-end;justify-content:center;z-index:40;backdrop-filter:blur(4px)}
+#modal.on{display:flex}
+#modal .sheet{background:var(--bg2);border:1px solid var(--line);border-bottom:none;border-radius:22px 22px 0 0;width:100%;max-width:560px;max-height:86dvh;overflow:auto;padding:18px 16px calc(env(safe-area-inset-bottom) + 18px)}
+.spinner{width:22px;height:22px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--acc);animation:spin .8s linear infinite;display:inline-block;vertical-align:middle}
+.dev{display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:12px;margin-top:8px;cursor:pointer}
+.dev.on{border-color:var(--acc);background:rgba(255,122,61,.1)}
+.team-in{display:flex;gap:8px;margin-top:8px}
+.trophy{font-size:72px;text-align:center;line-height:1;margin-top:20px}
+.seg{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px}
+.seg button{flex:1;border:none;background:none;color:var(--mute);font:600 14px var(--body);padding:8px 4px;border-radius:9px;cursor:pointer}
+.seg button.on{background:var(--bg3);color:var(--ink)}
+.yearedit{display:flex;gap:8px;justify-content:center;align-items:center;margin-top:10px}
+.yearedit input{width:110px;text-align:center;background:#fff;color:#1c1622;border-color:#d0c4b0}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast"></div>
+<div id="modal"><div class="sheet" id="sheet"></div></div>
+
+<script>
+'use strict';
+/* =========================================================
+   Jaarplaat — muziek-tijdlijnspel op basis van je Spotify
+   Eén bestand. Host op https (bv. GitHub Pages) of http://127.0.0.1
+   ========================================================= */
+
+const SCOPES = 'user-read-private user-top-read user-library-read playlist-read-private playlist-read-collaborative user-read-playback-state user-modify-playback-state';
+const REDIRECT = location.origin + location.pathname;
+const API = 'https://api.spotify.com/v1';
+const TOKEN_URL = 'https://accounts.spotify.com/api/token';
+
+const LS = {
+  get(k, d){ try{ const v = localStorage.getItem('jp.'+k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem('jp.'+k, JSON.stringify(v)); }catch(e){} },
+  del(k){ try{ localStorage.removeItem('jp.'+k); }catch(e){} }
+};
+
+const DEF_SETTINGS = { target:10, tokens:2, correct:true, noComp:true, start:'begin', snippet:60, minYear:'', maxYear:'', timeRange:'medium_term', useTop:true, useLiked:false };
+
+const S = {
+  view: 'connect',
+  clientId: LS.get('clientId', ''),
+  auth: LS.get('auth', null),
+  me: null,
+  demo: LS.get('demo', false),
+  pool: LS.get('pool', []),
+  settings: Object.assign({}, DEF_SETTINGS, LS.get('settings', {})),
+  playlists: null,
+  selPl: LS.get('selPl', {}),
+  links: LS.get('links', []),
+  devices: [],
+  deviceId: LS.get('deviceId', null),
+  teamNames: LS.get('teamNames', ['Team 1','Team 2']),
+  game: LS.get('game', null),
+  busy: '',
+  playing: false,
+  snipT: null,
+  pend: {}
+};
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const norm = s => String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/&/g,'and').replace(/[^a-z0-9]/g,'');
+function cleanName(n){
+  return String(n||'')
+    .replace(/\s+[-–—]\s+.*\b(remaster(ed)?|remix(ed)?\s+\d{4}|mono|stereo|single version|radio edit|live|deluxe|anniversary|bonus|version|edit|mix\s+\d{4}|\d{4})\b.*$/i,'')
+    .replace(/\s*[\(\[][^\)\]]*\b(remaster(ed)?|version|edit|mono|stereo|live|deluxe|anniversary|feat\.?|ft\.?|with)\b[^\)\]]*[\)\]]/ig,'')
+    .trim() || String(n||'');
+}
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+let toastT;
+function toast(msg, ms=3200){ const t=$('#toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('on'), ms); }
+function saveSettings(){ LS.set('settings', S.settings); }
+function saveGame(){ LS.set('game', S.game); }
+function openSheet(html){ $('#sheet').innerHTML = html; $('#modal').classList.add('on'); }
+function closeSheet(){ $('#modal').classList.remove('on'); }
+$('#modal').addEventListener('click', e => { if(e.target.id==='modal') closeSheet(); });
+function b64url(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+async function copy(text){ try{ await navigator.clipboard.writeText(text); toast('Gekopieerd'); }catch(e){ toast('Kopiëren lukte niet — selecteer de tekst handmatig'); } }
+
+/* ---------- auth (PKCE) ---------- */
+async function login(){
+  if(!S.clientId){ toast('Vul eerst je Client ID in'); return; }
+  if(!window.crypto?.subtle){ toast('Deze pagina moet via https of http://127.0.0.1 geopend worden'); return; }
+  const v = b64url(crypto.getRandomValues(new Uint8Array(48)));
+  const ch = b64url(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(v)));
+  const st = b64url(crypto.getRandomValues(new Uint8Array(12)));
+  LS.set('pkce', {v, st});
+  const p = new URLSearchParams({ client_id:S.clientId, response_type:'code', redirect_uri:REDIRECT, code_challenge_method:'S256', code_challenge:ch, scope:SCOPES, state:st });
+  location.href = 'https://accounts.spotify.com/authorize?' + p;
+}
+async function handleRedirect(){
+  const q = new URLSearchParams(location.search);
+  if(!q.has('code') && !q.has('error')) return;
+  history.replaceState(null, '', REDIRECT);
+  if(q.get('error')){ toast('Inloggen geannuleerd: '+q.get('error')); return; }
+  const pk = LS.get('pkce', null);
+  if(!pk || pk.st !== q.get('state')){ toast('Inloggen mislukt (controlecode klopt niet). Probeer opnieuw.'); return; }
+  const r = await fetch(TOKEN_URL, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:new URLSearchParams({ client_id:S.clientId, grant_type:'authorization_code', code:q.get('code'), redirect_uri:REDIRECT, code_verifier:pk.v }) });
+  const j = await r.json().catch(()=>({}));
+  LS.del('pkce');
+  if(!r.ok){ toast('Token ophalen mislukt: '+(j.error_description||j.error||r.status), 6000); return; }
+  saveTok(j);
+}
+function saveTok(j){
+  S.auth = { access:j.access_token, refresh:j.refresh_token || S.auth?.refresh, exp:Date.now() + ((j.expires_in||3600)-60)*1000 };
+  LS.set('auth', S.auth);
+}
+async function refreshTok(){
+  if(!S.auth?.refresh) throw new Error('Niet ingelogd');
+  const r = await fetch(TOKEN_URL, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:new URLSearchParams({ client_id:S.clientId, grant_type:'refresh_token', refresh_token:S.auth.refresh }) });
+  if(!r.ok){ S.auth=null; LS.del('auth'); render(); throw new Error('Sessie verlopen — log opnieuw in'); }
+  saveTok(await r.json());
+}
+function logout(){ S.auth=null; S.me=null; S.playlists=null; LS.del('auth'); S.view='connect'; render(); }
+
+async function api(path, opt={}, retry=0){
+  if(!S.auth) throw new Error('Niet ingelogd');
+  if(Date.now() > S.auth.exp) await refreshTok();
+  const url = path.startsWith('http') ? path : API + path;
+  const r = await fetch(url, { method:opt.method||'GET', headers:Object.assign({ Authorization:'Bearer '+S.auth.access }, opt.body ? {'Content-Type':'application/json'} : {}), body:opt.body });
+  if(r.status===401 && retry<1){ await refreshTok(); return api(path, opt, retry+1); }
+  if(r.status===429 && retry<4){ const s = +(r.headers.get('Retry-After')) || (2*(retry+1)); await sleep(s*1000); return api(path, opt, retry+1); }
+  if(r.status===204 || r.status===202) return null;
+  const txt = await r.text(); let j=null; try{ j = txt ? JSON.parse(txt) : null; }catch(e){}
+  if(!r.ok){ const e = new Error(j?.error?.message || ('HTTP '+r.status)); e.status=r.status; e.reason=j?.error?.reason; throw e; }
+  return j;
+}
+async function pages(path, max, onProgress){
+  const out=[]; let url=path;
+  while(url && out.length<max){ const j = await api(url); out.push(...(j?.items||[])); url = j?.next; onProgress && onProgress(out.length, j?.total); }
+  return out.slice(0, max);
+}
+
+/* ---------- muziek laden ---------- */
+function toCard(t){
+  if(!t || t.type!=='track' || t.is_local || !t.album || !t.uri) return null;
+  const y = parseInt(String(t.album.release_date||'').slice(0,4));
+  if(!y || y<1900) return null;
+  const imgs = t.album.images||[];
+  return { id:t.id, uri:t.uri, name:t.name, artist:(t.artists||[]).map(a=>a.name).join(', '), a1:t.artists?.[0]?.name||'',
+    year:y, y0:null, img:(imgs[1]||imgs[0]||{}).url||'', dur:t.duration_ms||180000, album:t.album.name||'', comp:t.album.album_type==='compilation', checked:false };
+}
+function plId(s){ const m = String(s).match(/playlist[\/:]([A-Za-z0-9]{10,})/); return m ? m[1] : (/^[A-Za-z0-9]{20,}$/.test(s.trim()) ? s.trim() : null); }
+async function plItems(id, cb){
+  try{ return await pages(`/playlists/${id}/items?limit=50`, 1500, cb); }
+  catch(e){ if(e.status===404 && !e._retried){ try{ return await pages(`/playlists/${id}/tracks?limit=50`, 1500, cb); }catch(e2){ throw e; } } throw e; }
+}
+async function loadPlaylists(){
+  S.busy='pl'; render();
+  try{
+    if(!S.me) S.me = await api('/me');
+    const items = await pages('/me/playlists?limit=50', 300);
+    S.playlists = items.filter(Boolean).map(p => ({ id:p.id, name:p.name, img:(p.images||[]).slice(-1)[0]?.url||'', total:(p.items||p.tracks||{}).total ?? '?', mine:(p.owner?.id===S.me.id) || p.collaborative }));
+  }catch(e){ toast('Playlists ophalen mislukt: '+e.message, 5000); }
+  S.busy=''; render();
+}
+async function loadPool(){
+  const st = S.settings; const raw=[]; const errs=[];
+  const prog = t => { const el=$('#prog'); if(el) el.textContent=t; };
+  S.busy='pool'; render();
+  try{
+    if(!S.me) S.me = await api('/me');
+    if(st.useTop){ prog('Toptracks ophalen…'); try{ (await pages(`/me/top/tracks?time_range=${st.timeRange}&limit=50`, 100)).forEach(t=>raw.push(t)); }catch(e){ errs.push('toptracks: '+e.message); } }
+    if(st.useLiked){ try{ (await pages('/me/tracks?limit=50', 600, n=>prog(`Gelikete nummers: ${n}…`))).forEach(i=>raw.push(i.track||i.item)); }catch(e){ errs.push('gelikete nummers: '+e.message); } }
+    const ids = [...Object.keys(S.selPl).filter(k=>S.selPl[k]), ...S.links.map(l=>l.id)];
+    for(const id of [...new Set(ids)]){
+      const nm = S.playlists?.find(p=>p.id===id)?.name || S.links.find(l=>l.id===id)?.name || 'playlist';
+      try{ (await plItems(id, n=>prog(`${nm}: ${n}…`))).forEach(i=>raw.push(i.item||i.track)); }
+      catch(e){ errs.push(`${nm}: ${e.status===403||e.status===404 ? 'geen toegang (alleen eigen of gedeelde playlists)' : e.message}`); }
+    }
+  }catch(e){ errs.push(e.message); }
+  const seen=new Set(); const pool=[];
+  const mn = parseInt(st.minYear)||0, mx = parseInt(st.maxYear)||9999;
+  for(const t of raw){
+    const c = toCard(t); if(!c) continue;
+    if(st.noComp && c.comp) continue;
+    if(c.year<mn || c.year>mx) continue;
+    const k = norm(cleanName(c.name))+'|'+norm(c.a1);
+    if(seen.has(k)) continue; seen.add(k); pool.push(c);
+  }
+  S.pool = pool; LS.set('pool', pool); S.busy='';
+  if(errs.length) toast('Let op — '+errs.join(' · '), 7000);
+  else if(!pool.length) toast('Geen nummers gevonden met deze keuze');
+  render();
+}
+
+/* jaarcorrectie: zoek de oudste uitgave van hetzelfde nummer van dezelfde artiest */
+function correctYear(card){
+  if(!card || S.demo || !S.settings.correct || card.checked) return Promise.resolve();
+  if(S.pend[card.id]) return S.pend[card.id];
+  const p = (async () => {
+    try{
+      const cn = cleanName(card.name);
+      const q = `track:${cn.replace(/"/g,'')} artist:${card.a1.replace(/"/g,'')}`;
+      const j = await api('/search?type=track&limit=10&q='+encodeURIComponent(q));
+      let m = card.year;
+      for(const t of j?.tracks?.items||[]){
+        if(norm(cleanName(t.name)) !== norm(cn)) continue;
+        if(!(t.artists||[]).some(a=>norm(a.name)===norm(card.a1))) continue;
+        const y = parseInt(String(t.album?.release_date||'').slice(0,4));
+        if(y>1900 && y<m) m=y;
+      }
+      if(m < card.year){ card.y0 = card.year; card.year = m; }
+      card.checked = true;
+    }catch(e){ /* geen correctie mogelijk; origineel jaar blijft staan */ }
+    delete S.pend[card.id];
+  })();
+  S.pend[card.id] = p; return p;
+}
+
+/* ---------- afspelen ---------- */
+async function loadDevices(){
+  if(S.demo){ S.devices=[]; return; }
+  try{ const j = await api('/me/player/devices'); S.devices = j?.devices||[];
+    if(!S.devices.find(d=>d.id===S.deviceId)){ const a = S.devices.find(d=>d.is_active) || S.devices[0]; S.deviceId = a?.id||null; LS.set('deviceId', S.deviceId); }
+  }catch(e){ toast('Apparaten ophalen mislukt: '+e.message); }
+}
+function devQS(){ return S.deviceId ? '?device_id='+encodeURIComponent(S.deviceId) : ''; }
+function snippetTimer(){
+  clearTimeout(S.snipT);
+  const sec = +S.settings.snippet;
+  const bar = $('#snipbar');
+  if(bar){ bar.style.transition='none'; bar.style.transform='scaleX(1)'; }
+  if(sec>0){
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{ const b=$('#snipbar'); if(b){ b.style.transition=`transform ${sec}s linear`; b.style.transform='scaleX(0)'; } }));
+    S.snipT = setTimeout(()=>{ if(S.playing) pausePlay(true); }, sec*1000);
+  }
+}
+async function playCard(c, fromStart){
+  if(S.demo){ S.playing=true; render(); snippetTimer(); return; }
+  if(c.pos==null) c.pos = S.settings.start==='random' ? Math.floor(c.dur*(0.2+Math.random()*0.35)) : 0;
+  try{
+    await api('/me/player/play'+devQS(), { method:'PUT', body:JSON.stringify({ uris:[c.uri], position_ms: fromStart===false ? undefined : c.pos }) });
+    S.playing=true; render(); snippetTimer();
+  }catch(e){
+    S.playing=false; render();
+    if(e.status===404 || e.reason==='NO_ACTIVE_DEVICE') { toast('Geen actief apparaat. Open Spotify op je telefoon of speaker en kies het apparaat.', 6000); devicesSheet(); }
+    else if(e.status===403) toast('Afspelen geweigerd: Spotify Premium is nodig op dit account ('+e.message+')', 6000);
+    else toast('Afspelen mislukt: '+e.message, 5000);
+  }
+}
+async function pausePlay(auto){
+  clearTimeout(S.snipT);
+  if(!S.demo){ try{ await api('/me/player/pause'+devQS(), {method:'PUT'}); }catch(e){ if(!auto) toast('Pauzeren mislukt: '+e.message); } }
+  S.playing=false; render();
+}
+async function resumePlay(){
+  if(!S.demo){ try{ await api('/me/player/play'+devQS(), {method:'PUT'}); }catch(e){ toast('Hervatten mislukt: '+e.message); return; } }
+  S.playing=true; render();
+  if(+S.settings.snippet>0){ clearTimeout(S.snipT); S.snipT=setTimeout(()=>{ if(S.playing) pausePlay(true); }, S.settings.snippet*1000); }
+}
+
+/* ---------- spel ---------- */
+async function startGame(){
+  const names = S.teamNames.map(n=>n.trim()).filter(Boolean);
+  if(names.length<1){ toast('Voeg minstens één team toe'); return; }
+  if(S.pool.length < names.length+5){ toast('Te weinig nummers in je muziekselectie'); return; }
+  if(!S.demo && !S.deviceId){ toast('Kies eerst een afspeelapparaat'); devicesSheet(); return; }
+  const deck = shuffle(S.pool.map(c=>Object.assign({}, c, {checked:S.demo?true:false, pos:null})));
+  const teams = names.map(n=>({ name:n, cards:[], tokens:+S.settings.tokens }));
+  S.busy='start'; render();
+  const starts = teams.map(()=>deck.pop());
+  await Promise.all(starts.map(c=>correctYear(c)));
+  teams.forEach((t,i)=>t.cards.push(starts[i]));
+  S.game = { teams, turn:0, deck, cur:{phase:'ready'}, target:+S.settings.target, startedAt:Date.now() };
+  if(S.pool.length < names.length*S.game.target) toast('Let op: de stapel is klein voor dit aantal teams en kaarten.', 5000);
+  S.busy=''; saveGame(); S.view='game'; render();
+  if(!S.demo) api('/me/player/repeat?state=off'+(S.deviceId?'&device_id='+encodeURIComponent(S.deviceId):''), {method:'PUT'}).catch(()=>{});
+}
+function team(){ return S.game.teams[S.game.turn]; }
+async function drawCard(){
+  const g=S.game;
+  if(!g.deck.length){ toast('De stapel is op!'); finishGame(); return; }
+  const c = g.deck.pop();
+  g.cur = { phase:'listen', card:c, slot:null };
+  saveGame(); render();
+  correctYear(c);
+  if(g.deck.length) correctYear(g.deck[g.deck.length-1]); // alvast de volgende
+  await playCard(c);
+}
+function fits(cards, slot, y){
+  return (slot===0 || cards[slot-1].year <= y) && (slot===cards.length || cards[slot].year >= y);
+}
+async function confirmPlace(){
+  const g=S.game, cur=g.cur, t=team();
+  if(cur.slot==null){ toast('Tik eerst op de plek in je tijdlijn'); return; }
+  $('#confirmBtn') && ($('#confirmBtn').innerHTML='<span class="spinner"></span>');
+  await correctYear(cur.card);
+  const ok = fits(t.cards, cur.slot, cur.card.year);
+  cur.result = ok ? 'ok' : 'bad';
+  if(ok){ t.cards.splice(cur.slot, 0, cur.card); cur.fresh = cur.card.id; }
+  cur.phase='reveal'; saveGame(); render();
+}
+async function buyCard(){
+  const g=S.game, cur=g.cur, t=team();
+  if(t.tokens<3){ toast('Je hebt 3 munten nodig'); return; }
+  t.tokens-=3;
+  await correctYear(cur.card);
+  let i=0; while(i<t.cards.length && t.cards[i].year<=cur.card.year) i++;
+  t.cards.splice(i,0,cur.card); cur.slot=i; cur.result='buy'; cur.fresh=cur.card.id; cur.phase='reveal';
+  saveGame(); render();
+}
+async function skipCard(paid){
+  const t=team();
+  if(paid){ if(t.tokens<1){ toast('Geen munten meer'); return; } t.tokens--; }
+  await drawCard();
+}
+function editYear(){
+  const g=S.game, cur=g.cur, t=team();
+  const v = parseInt($('#yearIn')?.value);
+  if(!v || v<1900 || v>2100){ toast('Vul een geldig jaartal in'); return; }
+  if(cur.result==='ok' || cur.result==='buy'){ const idx=t.cards.indexOf(cur.card); if(idx>-1) t.cards.splice(idx,1); }
+  if(cur.card.y0==null) cur.card.y0 = cur.card.year;
+  cur.card.year = v; cur.card.manual = true;
+  if(cur.result==='buy'){ let i=0; while(i<t.cards.length && t.cards[i].year<=v) i++; t.cards.splice(i,0,cur.card); }
+  else { const ok = fits(t.cards, cur.slot, v); cur.result = ok?'ok':'bad'; if(ok) t.cards.splice(cur.slot,0,cur.card); }
+  cur.editing=false; saveGame(); render();
+}
+function nextTurn(){
+  const g=S.game;
+  if(team().cards.length >= g.target){ finishGame(); return; }
+  g.turn = (g.turn+1) % g.teams.length;
+  g.cur = {phase:'ready'}; saveGame(); render(); window.scrollTo({top:0,behavior:'smooth'});
+}
+function finishGame(){ S.view='win'; pausePlay(true); saveGame(); render(); }
+
+/* ---------- testmodus ---------- */
+const DEMO = [
+ ['Johnny B. Goode','Chuck Berry',1958],['Like a Rolling Stone','Bob Dylan',1965],['Paint It Black','The Rolling Stones',1966],['Good Vibrations','The Beach Boys',1966],
+ ['Respect','Aretha Franklin',1967],['Hey Jude','The Beatles',1968],['Venus','Shocking Blue',1969],['Let It Be','The Beatles',1970],['Imagine','John Lennon',1971],
+ ['Superstition','Stevie Wonder',1972],['Radar Love','Golden Earring',1973],['Waterloo','ABBA',1974],['Bohemian Rhapsody','Queen',1975],['Dancing Queen','ABBA',1976],
+ ['Hotel California','Eagles',1976],['Heroes','David Bowie',1977],["Stayin' Alive",'Bee Gees',1977],['I Will Survive','Gloria Gaynor',1978],['Video Killed the Radio Star','The Buggles',1979],
+ ["Don't Stop Believin'",'Journey',1981],['Africa','Toto',1982],['Billie Jean','Michael Jackson',1982],['Sweet Dreams (Are Made of This)','Eurythmics',1983],['Purple Rain','Prince',1984],
+ ['Never Gonna Give You Up','Rick Astley',1987],["Sweet Child O' Mine","Guns N' Roses",1987],['Smells Like Teen Spirit','Nirvana',1991],['Losing My Religion','R.E.M.',1991],
+ ['Zombie','The Cranberries',1994],['Wonderwall','Oasis',1995],['Avond','Boudewijn de Groot',1997],['...Baby One More Time','Britney Spears',1998],['Bloed, Zweet en Tranen','André Hazes',2002],
+ ['Seven Nation Army','The White Stripes',2003],['Crazy in Love','Beyoncé',2003],['Mr. Brightside','The Killers',2003],['Hips Don\'t Lie','Shakira',2006],['Rehab','Amy Winehouse',2006],
+ ['Viva la Vida','Coldplay',2008],['Poker Face','Lady Gaga',2008],['Rolling in the Deep','Adele',2010],['Get Lucky','Daft Punk',2013],['Uptown Funk','Mark Ronson, Bruno Mars',2014],
+ ['Shape of You','Ed Sheeran',2017],['Despacito','Luis Fonsi, Daddy Yankee',2017],['bad guy','Billie Eilish',2019],['Blinding Lights','The Weeknd',2019],['Levitating','Dua Lipa',2020],['Flowers','Miley Cyrus',2023]
+];
+function startDemo(){
+  S.demo=true; LS.set('demo', true);
+  S.pool = DEMO.map(([name,artist,year],i)=>({ id:'demo'+i, uri:'', name, artist, a1:artist.split(',')[0], year, y0:null, img:'', dur:200000, album:'', comp:false, checked:true }));
+  LS.set('pool', S.pool); S.view='teams'; render();
+}
+function stopDemo(){ S.demo=false; LS.set('demo', false); S.pool=[]; LS.set('pool', []); S.view = S.auth ? 'source' : 'connect'; render(); }
+
+/* ---------- views ---------- */
+function logoHTML(){ return `<div class="logo"><div class="disc"></div><div class="disp" style="font-size:22px;font-weight:800">Jaarplaat</div></div>`; }
+function art(c, cls=''){ return c.img ? `<img class="${cls}" src="${esc(c.img)}" alt="" loading="lazy">` : `<div class="ph ${cls}" style="display:grid;place-items:center;font:800 18px var(--disp);color:#8a7c6a">${esc((c.a1||c.name||'?').trim().charAt(0).toUpperCase())}</div>`; }
+
+function vConnect(){
+  const fileProto = location.protocol==='file:';
+  return `
+  ${logoHTML()}
+  <div class="hero">
+    <div class="tag">Muziek-tijdlijnspel</div>
+    <h1>Raad het jaar.<br>Bouw je tijdlijn.</h1>
+    <p class="mute" style="margin-top:12px">Een nummer uit je eigen Spotify speelt. Leg het op de juiste plek tussen de nummers die je al hebt. Wie het eerst ${S.settings.target} kaarten heeft, wint.</p>
+  </div>
+  ${fileProto ? `<div class="warn"><b>Je opent dit bestand lokaal (file://).</b> Spotify-login werkt alleen via https of via <code>http://127.0.0.1</code>. Zet het bestand bijvoorbeeld op GitHub Pages, of start in de map <code>python3 -m http.server 8000</code> en open <code>http://127.0.0.1:8000</code>. De testmodus werkt wel.</div>` : ''}
+  <div class="panel stack">
+    <h3>Eenmalig instellen</h3>
+    <ol class="steps small">
+      <li>Ga naar <a href="https://developer.spotify.com/dashboard" target="_blank" rel="noopener">developer.spotify.com/dashboard</a> en maak een app aan (je hebt Premium nodig).</li>
+      <li>Vink <b>Web API</b> aan en zet deze <b>Redirect URI</b> erin:</li>
+    </ol>
+    <div class="copybox"><code class="grow">${esc(REDIRECT)}</code><button class="btn sm" data-a="copyRedirect">Kopieer</button></div>
+    <ol class="steps small" start="3">
+      <li>Spelen anderen mee met hun eigen account? Voeg hun e-mailadres toe onder <i>User Management</i> (max. 5).</li>
+      <li>Kopieer de <b>Client ID</b> van je app hieronder.</li>
+    </ol>
+    <label class="field"><span>Client ID</span><input type="text" id="cid" value="${esc(S.clientId)}" placeholder="bv. 3f9a…" autocomplete="off" autocapitalize="off" spellcheck="false" data-c="cid"></label>
+    <button class="btn primary big block" data-a="login" ${fileProto?'disabled':''}>Inloggen met Spotify</button>
+  </div>
+  <div class="center" style="margin-top:18px">
+    <button class="btn ghost" data-a="demo">Probeer eerst de testmodus (zonder Spotify)</button>
+  </div>`;
+}
+
+function vSource(){
+  const st=S.settings;
+  const resume = S.game && S.game.cur ? `<div class="note row between"><span>Er loopt nog een spel.</span><button class="btn sm gold" data-a="resume">Verder spelen</button></div>` : '';
+  const pl = S.playlists;
+  let plHTML;
+  if(S.busy==='pl') plHTML = `<div class="mute small" style="padding:10px 0"><span class="spinner"></span> Playlists laden…</div>`;
+  else if(!pl) plHTML = `<button class="btn sm" data-a="loadPl">Toon mijn playlists</button>`;
+  else plHTML = `<div class="pl-list">${pl.map(p=>`
+    <label class="pl ${p.mine?'':'off'}">
+      <input type="checkbox" data-c="pl" data-id="${esc(p.id)}" ${S.selPl[p.id]?'checked':''} ${p.mine?'':'disabled'} style="accent-color:var(--acc);width:18px;height:18px">
+      ${p.img?`<img src="${esc(p.img)}" alt="">`:'<div class="ph"></div>'}
+      <div class="grow"><div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.name)}</div>
+      <div class="small dim">${p.mine? (p.total+' nummers') : 'niet van jou — Spotify geeft hier geen toegang toe'}</div></div>
+    </label>`).join('') || '<div class="mute small">Geen playlists gevonden.</div>'}</div>`;
+  const links = S.links.map((l,i)=>`<div class="row small" style="margin-top:6px"><span class="grow mono">${esc(l.id)}</span><button class="btn sm ghost" data-a="rmLink" data-i="${i}">✕</button></div>`).join('');
+  const pool = S.pool;
+  let summary='';
+  if(S.busy==='pool') summary = `<div class="panel center"><span class="spinner"></span><p class="mute" id="prog">Muziek laden…</p></div>`;
+  else if(pool.length){
+    const dec={}; pool.forEach(c=>{ const d=Math.floor(c.year/10)*10; dec[d]=(dec[d]||0)+1; });
+    const ks=Object.keys(dec).map(Number).sort((a,b)=>a-b); const mx=Math.max(...Object.values(dec));
+    summary = `<div class="panel">
+      <div class="row between"><div><div class="bigstat">${pool.length}</div><div class="mute small">nummers in de stapel</div></div>
+      <div class="small mute" style="text-align:right">${ks[0]}–${Math.max(...pool.map(c=>c.year))}</div></div>
+      <div class="hist" style="margin-bottom:22px">${ks.map(k=>`<div style="height:${Math.max(4,dec[k]/mx*100)}%" title="${dec[k]}"><span>'${String(k).slice(2)}</span></div>`).join('')}</div>
+      <button class="btn primary big block" data-a="toTeams">Verder: teams kiezen</button>
+    </div>`;
+  }
+  return `
+  <div class="row between">${logoHTML()}<button class="btn sm ghost" data-a="logout">Uitloggen</button></div>
+  ${resume}
+  <h2 style="margin-top:22px">Kies je muziek</h2>
+  <p class="mute small">${S.me?`Ingelogd als <b>${esc(S.me.display_name||S.me.id)}</b>. `:''}Combineer zoveel bronnen als je wilt.</p>
+  <div class="panel">
+    <label class="opt"><input type="checkbox" data-c="useTop" ${st.useTop?'checked':''}>
+      <div class="grow"><b>Mijn toptracks</b><div class="small mute">Wat je zelf het meest luistert</div>
+      <div class="seg" style="margin-top:8px">${[['short_term','4 weken'],['medium_term','6 maanden'],['long_term','± 1 jaar']].map(([v,l])=>`<button data-a="tr" data-v="${v}" class="${st.timeRange===v?'on':''}">${l}</button>`).join('')}</div></div></label>
+    <label class="opt"><input type="checkbox" data-c="useLiked" ${st.useLiked?'checked':''}>
+      <div><b>Gelikete nummers</b><div class="small mute">Tot 600 nummers uit je bibliotheek</div></div></label>
+    <div class="opt" style="display:block;border-top:1px solid var(--line)">
+      <b>Mijn playlists</b><div class="small mute" style="margin-bottom:8px">Alleen playlists die je zelf hebt gemaakt of waarin je meewerkt</div>
+      ${plHTML}
+    </div>
+    <div class="opt" style="display:block;border-top:1px solid var(--line)">
+      <b>Playlist-link plakken</b>
+      <div class="team-in"><input type="text" id="plLink" placeholder="https://open.spotify.com/playlist/…" autocapitalize="off"><button class="btn" data-a="addLink">Voeg toe</button></div>
+      ${links}
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Filters</h3>
+    <label class="opt"><input type="checkbox" data-c="correct" ${st.correct?'checked':''}>
+      <div><b>Slimme jaarcorrectie</b><div class="small mute">Remasters en heruitgaven krijgen het jaar van de oudste versie die Spotify kent</div></div></label>
+    <label class="opt"><input type="checkbox" data-c="noComp" ${st.noComp?'checked':''}>
+      <div><b>Verzamelalbums overslaan</b><div class="small mute">Die hebben vaak een verkeerd jaartal</div></div></label>
+    <div class="row" style="margin-top:6px">
+      <label class="field grow"><span>Vanaf jaar</span><input type="number" inputmode="numeric" data-c="minYear" value="${esc(st.minYear)}" placeholder="1950"></label>
+      <label class="field grow"><span>Tot en met</span><input type="number" inputmode="numeric" data-c="maxYear" value="${esc(st.maxYear)}" placeholder="${new Date().getFullYear()}"></label>
+    </div>
+  </div>
+  <button class="btn ${pool.length?'':'primary'} big block" data-a="loadPool" ${S.busy?'disabled':''}>${pool.length?'Opnieuw laden':'Muziek laden'}</button>
+  ${summary}`;
+}
+
+function vTeams(){
+  const st=S.settings;
+  const devs = S.demo ? `<div class="note">Testmodus: er speelt geen muziek. De spelleider leest titel en artiest voor via het oogje 👁.</div>` :
+    (S.devices.length ? S.devices.map(d=>`<div class="dev ${d.id===S.deviceId?'on':''}" data-a="dev" data-id="${esc(d.id)}"><span style="font-size:20px">${devIcon(d.type)}</span><div class="grow"><b>${esc(d.name)}</b><div class="small dim">${esc(d.type)}${d.is_active?' · actief':''}</div></div>${d.id===S.deviceId?'<span style="color:var(--acc)">●</span>':''}</div>`).join('')
+      : `<div class="mute small">Geen apparaten gevonden. Open de Spotify-app op je telefoon, laptop of speaker, speel kort iets af en tik op Vernieuwen.</div>`);
+  return `
+  <div class="row between">${logoHTML()}<button class="btn sm ghost" data-a="back">← Muziek</button></div>
+  <h2 style="margin-top:22px">Wie speelt er mee?</h2>
+  <p class="mute small">${S.pool.length} nummers in de stapel${S.demo?' (testmodus)':''}.</p>
+  <div class="panel">
+    <h3>Teams of spelers</h3>
+    ${S.teamNames.map((n,i)=>`<div class="team-in"><input type="text" value="${esc(n)}" data-c="team" data-i="${i}" placeholder="Naam">${S.teamNames.length>1?`<button class="btn ghost" data-a="rmTeam" data-i="${i}" aria-label="Verwijder">✕</button>`:''}</div>`).join('')}
+    ${S.teamNames.length<8?`<button class="btn sm" data-a="addTeam" style="margin-top:10px">+ Team toevoegen</button>`:''}
+  </div>
+  <div class="panel">
+    <h3>Spelregels</h3>
+    <div class="row">
+      <label class="field grow"><span>Kaarten om te winnen</span><select data-c="target">${[5,6,7,8,10,12,15].map(v=>`<option ${+st.target===v?'selected':''}>${v}</option>`).join('')}</select></label>
+      <label class="field grow"><span>Startmunten</span><select data-c="tokens">${[0,1,2,3,5].map(v=>`<option ${+st.tokens===v?'selected':''}>${v}</option>`).join('')}</select></label>
+    </div>
+    <div class="row">
+      <label class="field grow"><span>Fragmentlengte</span><select data-c="snippet">${[[0,'Heel nummer'],[30,'30 sec'],[45,'45 sec'],[60,'60 sec'],[90,'90 sec']].map(([v,l])=>`<option value="${v}" ${+st.snippet===v?'selected':''}>${l}</option>`).join('')}</select></label>
+      <label class="field grow"><span>Start van het nummer</span><select data-c="start"><option value="begin" ${st.start==='begin'?'selected':''}>Vanaf begin</option><option value="random" ${st.start==='random'?'selected':''}>Ergens midden</option></select></label>
+    </div>
+    <p class="small dim">Munten verdien je door titel én artiest goed te raden. 1 munt = nummer overslaan, 3 munten = kaart kopen.</p>
+  </div>
+  <div class="panel">
+    <div class="row between"><h3>Afspelen op</h3>${S.demo?'':`<button class="btn sm" data-a="refreshDev">Vernieuwen</button>`}</div>
+    ${devs}
+    ${S.demo?'':`<p class="small dim" style="margin-top:10px">Tip: speel af op een speaker of laptop. Op je eigen telefoon kan de titel op het vergrendelscherm verschijnen.</p>`}
+  </div>
+  <button class="btn primary big block" data-a="start" ${S.busy?'disabled':''}>${S.busy==='start'?'<span class="spinner"></span> Klaarzetten…':'Start het spel'}</button>
+  ${S.demo?`<div class="center" style="margin-top:12px"><button class="btn sm ghost" data-a="stopDemo">Testmodus verlaten</button></div>`:''}`;
+}
+function devIcon(t){ return ({Smartphone:'📱',Computer:'💻',Speaker:'🔊',TV:'📺',CastAudio:'🔊',CastVideo:'📺',AVR:'🎛️',Tablet:'📱',Automobile:'🚗'})[t]||'🎵'; }
+
+function timelineHTML(t, withSlots, cur){
+  const cards=t.cards; let h='';
+  const slot = i => {
+    if(!withSlots) return '';
+    const sel = cur.slot===i;
+    const lbl = sel ? '♪ Hier leggen' : (i===0 ? 'Ouder' : i===cards.length ? 'Nieuwer' : 'Hiertussen');
+    return `<div class="slot ${sel?'sel':''}" data-a="slot" data-i="${i}">${sel?'':'+'} ${lbl}</div>`;
+  };
+  h += `<div class="edge">ouder ↑</div>`;
+  cards.forEach((c,i)=>{ h += slot(i) + cardHTML(c, cur && cur.fresh===c.id); });
+  h += slot(cards.length);
+  h += `<div class="edge">↓ nieuwer</div>`;
+  return `<div class="tl">${h}</div>`;
+}
+function cardHTML(c, fresh){
+  return `<div class="tcard ${fresh?'fresh':''}">${art(c)}<div class="yr">${c.year}</div><div class="grow" style="min-width:0"><div class="t">${esc(c.name)}</div><div class="a">${esc(c.artist)}</div></div></div>`;
+}
+function scoresHTML(){
+  const g=S.game;
+  return `<div class="scores">${g.teams.map((t,i)=>`<div class="chip ${i===g.turn?'on':''}" data-a="viewTeam" data-i="${i}"><span class="n">${t.cards.length}</span>${esc(t.name)}<span class="coins">● ${t.tokens}</span></div>`).join('')}</div>`;
+}
+function vGame(){
+  const g=S.game, t=team(), cur=g.cur;
+  const head = `<div class="row between" style="margin-bottom:12px">${logoHTML()}<div class="row"><span class="small dim">doel ${g.target} · stapel ${g.deck.length}</span><button class="menu-btn" data-a="menu" aria-label="Menu">⋯</button></div></div>${scoresHTML()}`;
+  if(cur.phase==='ready'){
+    return `${head}
+      <div class="turnhead"><div class="sub">Aan de beurt</div><div class="who">${esc(t.name)}</div><div class="sub">${t.cards.length} van ${g.target} kaarten · ${t.tokens} munt${t.tokens===1?'':'en'}</div></div>
+      <div class="deck"><div class="vinyl"><div class="lbl"><span>?</span></div></div></div>
+      <div class="sticky"><button class="btn primary big block" data-a="draw">▶ Draai een plaat</button></div>
+      ${timelineHTML(t,false,cur)}`;
+  }
+  if(cur.phase==='listen'){
+    const c=cur.card;
+    return `${head}
+      <div class="turnhead"><div class="who">${esc(t.name)}</div><div class="sub">Luister en tik op de juiste plek in je tijdlijn</div></div>
+      <div class="deck"><div class="vinyl spin ${S.playing?'':'paused'}"><div class="lbl"><span>?</span></div></div></div>
+      ${+S.settings.snippet>0?`<div class="snip"><i id="snipbar" style="transform:scaleX(${S.playing?1:0})"></i></div>`:''}
+      <div class="ctrl">
+        ${S.playing?`<button class="btn" data-a="pause">❚❚ Pauze</button>`:`<button class="btn" data-a="resume2">▶ Verder</button>`}
+        <button class="btn" data-a="replay">↺ Opnieuw</button>
+        <button class="btn" data-a="peek" title="Alleen voor de spelleider">👁</button>
+      </div>
+      <div class="ctrl">
+        <button class="btn sm" data-a="skip" ${t.tokens<1?'disabled':''}>Overslaan · 1 munt</button>
+        <button class="btn sm" data-a="buy" ${t.tokens<3?'disabled':''}>Kaart kopen · 3 munten</button>
+        <button class="btn sm ghost" data-a="broken">Speelt niet af</button>
+      </div>
+      ${timelineHTML(t,true,cur)}
+      <div class="sticky"><button id="confirmBtn" class="btn primary big block" data-a="confirm" ${cur.slot==null?'disabled':''}>${cur.slot==null?'Kies een plek in de tijdlijn':'Leg de kaart hier'}</button></div>`;
+  }
+  if(cur.phase==='reveal'){
+    const c=cur.card; const won = t.cards.length>=g.target;
+    const verdict = cur.result==='ok' ? `<div class="verdict ok">Goed! 🎉</div>` : cur.result==='buy' ? `<div class="verdict buy">Gekocht 🪙</div>` : `<div class="verdict bad">Helaas, mis</div>`;
+    return `${head}
+      ${verdict}
+      <div class="reveal">
+        ${art(c)}
+        <div class="yr">${c.year}</div>
+        <div class="t">${esc(c.name)}</div>
+        <div class="a">${esc(c.artist)}</div>
+        ${c.y0 && c.y0!==c.year ? `<div class="orig">${c.manual?'Jaartal aangepast':'Jaar gecorrigeerd'} — deze versie staat op Spotify als ${c.y0}${c.album?` (${esc(c.album)})`:''}</div>` : (c.album?`<div class="orig">${esc(c.album)}</div>`:'')}
+        ${cur.editing ? `<div class="yearedit"><input id="yearIn" type="number" inputmode="numeric" value="${c.year}"><button class="btn sm primary" data-a="saveYear">Opslaan</button></div>`
+          : `<div style="margin-top:10px"><button class="btn sm ghost" style="color:#5b4f66;border-color:#d0c4b0" data-a="editYear">Jaartal klopt niet?</button></div>`}
+      </div>
+      <div class="ctrl" style="margin-top:14px">
+        ${cur.bonus ? `<span class="small" style="color:var(--acc2)">+1 munt verdiend</span>` : `<button class="btn gold" data-a="bonus" ${t.tokens>=5?'disabled':''}>Titel + artiest geraden · +1 munt</button>`}
+      </div>
+      <div class="sticky"><button class="btn primary big block" data-a="next">${won?'🏆 Bekijk de winnaar':'Volgende: '+esc(g.teams[(g.turn+1)%g.teams.length].name)+' →'}</button></div>
+      <h3 style="margin-top:22px">Tijdlijn van ${esc(t.name)}</h3>
+      ${timelineHTML(t,false,cur)}`;
+  }
+  return head;
+}
+function vWin(){
+  const g=S.game; if(!g) { S.view='source'; return vSource(); }
+  const best = [...g.teams].sort((a,b)=>b.cards.length-a.cards.length)[0];
+  return `${logoHTML()}
+    <div class="trophy">🏆</div>
+    <div class="turnhead"><div class="sub">Winnaar</div><div class="who">${esc(best.name)}</div><div class="sub">${best.cards.length} kaarten in de tijdlijn</div></div>
+    <div class="panel">${g.teams.map(t=>`<div class="row between" style="padding:6px 0"><b>${esc(t.name)}</b><span class="mute">${t.cards.length} kaarten · ${t.tokens} munten</span></div>`).join('')}</div>
+    <button class="btn primary big block" data-a="again">Nog een potje (zelfde muziek)</button>
+    <button class="btn big block" style="margin-top:10px" data-a="newMusic">Andere muziek kiezen</button>
+    <h3 style="margin-top:24px">Tijdlijn van ${esc(best.name)}</h3>
+    ${timelineHTML(best,false,{})}`;
+}
+
+function render(){
+  let v=S.view;
+  if(v==='connect' && (S.auth || S.demo)) v = S.view = S.demo ? (S.game?'game':'teams') : 'source';
+  if(v==='game' && !S.game) v = S.view = S.demo ? 'teams' : 'source';
+  const html = v==='connect'?vConnect() : v==='source'?vSource() : v==='teams'?vTeams() : v==='game'?vGame() : vWin();
+  $('#app').innerHTML = html;
+}
+
+/* ---------- acties ---------- */
+const A = {
+  copyRedirect: ()=>copy(REDIRECT),
+  login: ()=>{ S.clientId = $('#cid').value.trim(); LS.set('clientId', S.clientId); login(); },
+  demo: startDemo,
+  stopDemo: ()=>{ S.game=null; LS.del('game'); stopDemo(); },
+  logout,
+  resume: ()=>{ S.view='game'; render(); },
+  loadPl: loadPlaylists,
+  tr: b=>{ S.settings.timeRange=b.dataset.v; S.settings.useTop=true; saveSettings(); render(); },
+  addLink: ()=>{ const v=$('#plLink').value; const id=plId(v); if(!id){ toast('Dat lijkt geen playlist-link'); return; } if(!S.links.find(l=>l.id===id)) S.links.push({id}); LS.set('links', S.links); render(); },
+  rmLink: b=>{ S.links.splice(+b.dataset.i,1); LS.set('links', S.links); render(); },
+  loadPool,
+  toTeams: async ()=>{ S.view='teams'; render(); await loadDevices(); render(); },
+  back: ()=>{ S.view = S.demo ? 'teams' : 'source'; if(S.demo){ toast('In de testmodus is de muziek vast'); } render(); },
+  addTeam: ()=>{ S.teamNames.push('Team '+(S.teamNames.length+1)); LS.set('teamNames', S.teamNames); render(); },
+  rmTeam: b=>{ S.teamNames.splice(+b.dataset.i,1); LS.set('teamNames', S.teamNames); render(); },
+  refreshDev: async ()=>{ await loadDevices(); render(); if(!S.devices.length) toast('Nog geen apparaat gevonden'); },
+  dev: b=>{ S.deviceId=b.dataset.id; LS.set('deviceId', S.deviceId); render();
+    if(!S.demo) api('/me/player', {method:'PUT', body:JSON.stringify({device_ids:[S.deviceId], play:false})}).catch(()=>{}); },
+  devSheet: async b=>{ S.deviceId=b.dataset.id; LS.set('deviceId', S.deviceId); closeSheet();
+    try{ await api('/me/player', {method:'PUT', body:JSON.stringify({device_ids:[S.deviceId], play:false})}); }catch(e){}
+    toast('Apparaat gekozen'); },
+  refreshSheet: async ()=>{ await loadDevices(); devicesSheet(); },
+  start: startGame,
+  draw: drawCard,
+  pause: ()=>pausePlay(false),
+  resume2: resumePlay,
+  replay: ()=>playCard(S.game.cur.card),
+  peek: ()=>{ const c=S.game.cur.card; openSheet(`<h3>Alleen voor de spelleider</h3><p class="mute small">Handig in de testmodus, of om te controleren wat er speelt.</p><div class="tcard" style="margin-top:12px">${art(c)}<div class="grow"><div class="t">${esc(c.name)}</div><div class="a">${esc(c.artist)}</div></div></div><button class="btn block" style="margin-top:14px" data-a="close">Verberg</button>`); },
+  skip: ()=>skipCard(true),
+  buy: buyCard,
+  broken: ()=>skipCard(false),
+  slot: b=>{ const i=+b.dataset.i; S.game.cur.slot = S.game.cur.slot===i ? null : i; render(); },
+  confirm: confirmPlace,
+  bonus: ()=>{ const t=team(); if(t.tokens<5) t.tokens++; S.game.cur.bonus=true; S.game.cur.fresh=null; saveGame(); render(); },
+  editYear: ()=>{ S.game.cur.editing=true; render(); setTimeout(()=>$('#yearIn')?.focus(),50); },
+  saveYear: editYear,
+  next: nextTurn,
+  viewTeam: b=>{ const t=S.game.teams[+b.dataset.i]; openSheet(`<div class="row between"><h3>${esc(t.name)}</h3><span class="coins">● ${t.tokens} munten</span></div>${timelineHTML(t,false,{})}<button class="btn block" style="margin-top:14px" data-a="close">Sluiten</button>`); },
+  menu: ()=>openSheet(`<h3>Menu</h3>
+     <button class="btn block" style="margin-top:12px" data-a="devMenu" ${S.demo?'disabled':''}>Afspeelapparaat kiezen</button>
+     <button class="btn block" style="margin-top:8px" data-a="endNow">Spel nu beëindigen</button>
+     <button class="btn block" style="margin-top:8px" data-a="quit">Stoppen en terug naar instellingen</button>
+     <button class="btn ghost block" style="margin-top:8px" data-a="close">Sluiten</button>`),
+  devMenu: devicesSheet,
+  endNow: ()=>{ closeSheet(); finishGame(); },
+  quit: ()=>{ closeSheet(); pausePlay(true); S.game=null; LS.del('game'); S.view = S.demo ? 'teams' : 'source'; render(); },
+  close: closeSheet,
+  again: async ()=>{ S.game=null; LS.del('game'); S.view='teams'; render(); if(!S.demo){ await loadDevices(); render(); } },
+  newMusic: ()=>{ S.game=null; LS.del('game'); if(S.demo){ stopDemo(); } else { S.view='source'; render(); } }
+};
+async function devicesSheet(){
+  openSheet(`<h3>Afspelen op</h3><div class="mute small" style="margin:8px 0"><span class="spinner"></span> Apparaten zoeken…</div>`);
+  await loadDevices();
+  openSheet(`<div class="row between"><h3>Afspelen op</h3><button class="btn sm" data-a="refreshSheet">Vernieuwen</button></div>
+    ${S.devices.length ? S.devices.map(d=>`<div class="dev ${d.id===S.deviceId?'on':''}" data-a="devSheet" data-id="${esc(d.id)}"><span style="font-size:20px">${devIcon(d.type)}</span><div class="grow"><b>${esc(d.name)}</b><div class="small dim">${esc(d.type)}${d.is_active?' · actief':''}</div></div></div>`).join('')
+      : `<p class="mute small">Geen apparaten gevonden. Open Spotify op je telefoon, laptop of speaker, speel kort iets af en tik op Vernieuwen.</p>`}
+    <button class="btn ghost block" style="margin-top:12px" data-a="close">Sluiten</button>`);
+}
+
+document.addEventListener('click', e=>{
+  const b = e.target.closest('[data-a]'); if(!b || b.disabled) return;
+  const f = A[b.dataset.a]; if(f){ e.preventDefault(); Promise.resolve(f(b,e)).catch(err=>toast(err.message||String(err), 5000)); }
+});
+document.addEventListener('change', e=>{
+  const el = e.target; const c = el.dataset?.c; if(!c) return;
+  const st=S.settings;
+  if(c==='cid'){ S.clientId=el.value.trim(); LS.set('clientId', S.clientId); return; }
+  if(c==='pl'){ S.selPl[el.dataset.id]=el.checked; LS.set('selPl', S.selPl); return; }
+  if(c==='team'){ S.teamNames[+el.dataset.i]=el.value; LS.set('teamNames', S.teamNames); return; }
+  if(['useTop','useLiked','correct','noComp'].includes(c)) st[c]=el.checked;
+  else if(['target','tokens','snippet'].includes(c)) st[c]=+el.value;
+  else st[c]=el.value;
+  saveSettings();
+});
+document.addEventListener('keydown', e=>{ if(e.key==='Enter' && e.target.id==='plLink'){ e.preventDefault(); A.addLink(); } if(e.key==='Enter' && e.target.id==='yearIn'){ e.preventDefault(); editYear(); } });
+
+/* ---------- start ---------- */
+(async ()=>{
+  try{ await handleRedirect(); }catch(e){ toast('Inloggen mislukt: '+e.message, 6000); }
+  if(S.auth && !S.demo){
+    S.view = S.game ? 'source' : 'source';
+    render();
+    try{ S.me = await api('/me'); }catch(e){ toast(e.message); }
+  }
+  render();
+})();
+</script>
+</body>
+</html>
